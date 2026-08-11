@@ -78,28 +78,33 @@ st.sidebar.write(f"*(Estimasi: {pct_rhb*100:.0f}% RHB, {pct_lhb*100:.0f}% LHB)*"
 # Batters Faced (PA) Input
 expected_pa = st.sidebar.number_input("Expected Batters Faced (PA)", min_value=10.0, max_value=35.0, value=22.5, step=0.5)
 
-# ==========================================
+## ==========================================
 # 3. STAT LOOKUP & LOGIC (BACKEND)
 # ==========================================
 # ATURAN #1: Matching string aman via data_handler
 stats = get_pitcher_stats(selected_pitcher, df_master, df_rhb, df_lhb)
 
 if not stats:
-    st.error(f"❌ Pitcher '{selected_pitcher}' tidak ditemukan di database CSV (`master_pitcher2026.csv`). Pastikan nama sesuai.")
+    st.error(f"❌ Pitcher '{selected_pitcher}' tidak ditemukan sama sekali di database CSV. Pastikan nama sesuai.")
     st.stop()
 
+# SISTEM FALLBACK: Jika tidak ada data L60, gunakan data Full Season (Master)
+using_fallback = False
 if not stats['vs_rhb'] and not stats['vs_lhb']:
-    st.warning(f"⚠️ Data splits L60 tidak ditemukan untuk {selected_pitcher}.")
-    st.stop()
+    st.warning(f"⚠️ Data L60 tidak ditemukan untuk {selected_pitcher} (Mungkin baru kembali dari cedera). Sistem otomatis menggunakan data Full Season.")
+    stat_rhb = stats['master']
+    stat_lhb = stats['master']
+    using_fallback = True
+else:
+    # Fallback jika hanya ada data salah satu handedness di L60
+    stat_rhb = stats['vs_rhb'] if stats['vs_rhb'] else stats['vs_lhb']
+    stat_lhb = stats['vs_lhb'] if stats['vs_lhb'] else stats['vs_rhb']
 
-# Fallback jika hanya ada data salah satu handedness
-stat_rhb = stats['vs_rhb'] if stats['vs_rhb'] else stats['vs_lhb']
-stat_lhb = stats['vs_lhb'] if stats['vs_lhb'] else stats['vs_rhb']
-
-# ATURAN #2: Mode Hyper-Recent (Pembobotan L60 berdasarkan lineup lawan)
-weighted_k_pct = (stat_rhb['k_percent'] * pct_rhb) + (stat_lhb['k_percent'] * pct_lhb)
-weighted_bb_pct = (stat_rhb['bb_percent'] * pct_rhb) + (stat_lhb['bb_percent'] * pct_lhb)
-weighted_xba = (stat_rhb['xba'] * pct_rhb) + (stat_lhb['xba'] * pct_lhb)
+# ATURAN #2: Pembobotan Stat berdasarkan Lineup Lawan
+# (Kita bungkus dengan float() untuk mencegah error jika format angka dari CSV berupa teks)
+weighted_k_pct = (float(stat_rhb['k_percent']) * pct_rhb) + (float(stat_lhb['k_percent']) * pct_lhb)
+weighted_bb_pct = (float(stat_rhb['bb_percent']) * pct_rhb) + (float(stat_lhb['bb_percent']) * pct_lhb)
+weighted_xba = (float(stat_rhb['xba']) * pct_rhb) + (float(stat_lhb['xba']) * pct_lhb)
 
 # Hitung nilai ekspektasi
 x_strikeouts = me.calculate_xk(expected_pa, weighted_k_pct)
