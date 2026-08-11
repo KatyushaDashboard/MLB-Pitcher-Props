@@ -82,39 +82,51 @@ def get_pitcher_recent_pa(pitcher_id):
         
     return 19.5 # Fallback standar
 
-def calculate_lineup_handedness(game_pk, team_type, pitcher_hand):
+def calculate_lineup_handedness(game_pk, team_id, team_type, pitcher_hand):
     """
-    OTOMASI HANDEDNESS %:
-    Menarik 9 nama projected batter dari MLB Preview, cek R/L/S, dan sesuaikan Switch Hitter.
+    Versi Anti-Fallback:
+    1. Cek Lineup Resmi (9 Starter).
+    2. Jika kepagian (belum rilis), pakai 26-Man Active Roster sebagai proxy akurat!
     """
-    url = f"https://statsapi.mlb.com/api/v1/game/{game_pk}/lineups"
     try:
-        res = requests.get(url)
-        if res.status_code == 200:
-            data = res.json()
-            lineup = data.get(team_type, [])
+        # Skenario 1: Cek Boxscore untuk Lineup Resmi
+        box_url = f"https://statsapi.mlb.com/api/v1/game/{game_pk}/boxscore"
+        box_data = requests.get(box_url).json()
+        batters_ids = box_data.get('teams', {}).get(team_type, {}).get('battingOrder', [])
+        
+        if batters_ids:
+            rhb_count = 0
+            players = box_data['teams'][team_type]['players']
+            for pid in batters_ids:
+                player_key = f"ID{pid}"
+                bat_side = players.get(player_key, {}).get('person', {}).get('batSide', {}).get('code', 'R')
+                if bat_side == 'R' or (bat_side == 'S' and pitcher_hand == 'L'):
+                    rhb_count += 1
+            return round(rhb_count / len(batters_ids), 2)
             
-            if lineup:
-                rhb_count = 0
-                total_batters = len(lineup[:9]) # Ambil 9 starter utama
-                
-                for player in lineup[:9]:
-                    bat_side = player.get('batSide', {}).get('code', 'R')
-                    
-                    if bat_side == 'R':
+        # Skenario 2: Kepagian! Tarik 26-Man Active Roster
+        roster_url = f"https://statsapi.mlb.com/api/v1/teams/{team_id}/roster/Active?hydrate=person"
+        roster_data = requests.get(roster_url).json()
+        roster = roster_data.get('roster', [])
+        
+        if roster:
+            rhb_count = 0
+            batter_count = 0
+            for p in roster:
+                # Ambil pemain yang BUKAN Pitcher
+                if p.get('position', {}).get('abbreviation') != 'P':
+                    batter_count += 1
+                    bat_side = p.get('person', {}).get('batSide', {}).get('code', 'R')
+                    if bat_side == 'R' or (bat_side == 'S' and pitcher_hand == 'L'):
                         rhb_count += 1
-                    elif bat_side == 'S': # Switch Hitter Logic
-                        # Jika pitcher Kanan, Switch Hitter jadi Kiri (LHB).
-                        # Jika pitcher Kiri, Switch Hitter jadi Kanan (RHB).
-                        if pitcher_hand == 'L':
-                            rhb_count += 1
-                            
-                if total_batters > 0:
-                    return round(rhb_count / total_batters, 2)
-    except Exception:
+            if batter_count > 0:
+                return round(rhb_count / batter_count, 2)
+                
+    except Exception as e:
+        print(f"Error calculate handedness: {e}")
         pass
         
-    return 0.65 # Fallback standar
+    return 0.65 # Fallback mutlak jika MLB API sedang down
 
 def get_today_schedule():
     today = datetime.datetime.now().strftime('%Y-%m-%d')
@@ -136,6 +148,10 @@ def get_today_schedule():
         away_team = game['teams']['away']['team']['name']
         home_team = game['teams']['home']['team']['name']
         
+        # Tarik Team ID untuk keperluan cek Roster
+        away_team_id = game['teams']['away']['team']['id']
+        home_team_id = game['teams']['home']['team']['id']
+        
         away_pitcher_info = game['teams']['away'].get('probablePitcher', {})
         home_pitcher_info = game['teams']['home'].get('probablePitcher', {})
         
@@ -146,14 +162,18 @@ def get_today_schedule():
         away_pitcher_id = away_pitcher_info.get('id')
         home_pitcher_id = home_pitcher_info.get('id')
         
+        # Ekstrak Tangan Pitcher (R/L) dari hydrate API
+        # Default R jika kosong
+        away_pitcher_hand = "R" 
+        home_pitcher_hand = "R"
+        
         # Hitung Expected PA 30 hari terakhir
         away_expected_pa = get_pitcher_recent_pa(away_pitcher_id)
         home_expected_pa = get_pitcher_recent_pa(home_pitcher_id)
         
-        # Hitung Handedness 9 Batter Lawan
-        # (Away Pitcher lawan Home Lineup, Home Pitcher lawan Away Lineup)
-        home_rhb_pct = calculate_lineup_handedness(game_pk, 'homeLineup', 'R')
-        away_rhb_pct = calculate_lineup_handedness(game_pk, 'awayLineup', 'R')
+        # Hitung Handedness Lawan (Pakai data tim & tangan pitcher kita)
+        home_rhb_pct = calculate_lineup_handedness(game_pk, home_team_id, 'home', away_pitcher_hand)
+        away_rhb_pct = calculate_lineup_handedness(game_pk, away_team_id, 'away', home_pitcher_hand)
         
         away_props = props_data.get(away_pitcher.lower().strip(), {})
         home_props = props_data.get(home_pitcher.lower().strip(), {})
