@@ -1,17 +1,10 @@
 import streamlit as st
 import json
 import os
-import pandas as pd
-from utils.data_handler import load_and_clean_data, get_pitcher_stats
+import utils.data_handler as dh
 import utils.math_engine as me
 
-# Set UI Streamlit
-st.set_page_config(
-    page_title="MLB Pitcher Props Master",
-    page_icon="⚾",
-    layout="wide"
-)
-
+st.set_page_config(page_title="MLB Pitcher Props Master", page_icon="⚾", layout="wide")
 st.title("⚾ MLB Pitcher Props EV Calculator")
 st.markdown("Welcome back, Boss. Mesin +EV siap beraksi.")
 
@@ -20,7 +13,7 @@ st.markdown("Welcome back, Boss. Mesin +EV siap beraksi.")
 # ==========================================
 @st.cache_data
 def load_all_data():
-    df_master, df_rhb, df_lhb = load_and_clean_data()
+    df_master, df_rhb, df_lhb = dh.load_and_clean_data()
     
     schedule_path = 'data/today_schedule.json'
     if os.path.exists(schedule_path):
@@ -46,12 +39,10 @@ if not schedule:
 # ==========================================
 st.sidebar.header("⚙️ Matchup Setup")
 
-# Format dropdown pilihan game
 game_options = {f"{g['away_team']} @ {g['home_team']}": g for g in schedule}
 selected_game_label = st.sidebar.selectbox("Pilih Pertandingan:", list(game_options.keys()))
 selected_game = game_options[selected_game_label]
 
-# Dropdown pilihan Starting Pitcher dari game tersebut
 pitcher_options = {
     f"Away: {selected_game['away_pitcher']} ({selected_game['away_team']})": selected_game['away_pitcher'],
     f"Home: {selected_game['home_pitcher']} ({selected_game['home_team']})": selected_game['home_pitcher']
@@ -63,7 +54,7 @@ if selected_pitcher == "TBD" or not selected_pitcher:
     st.warning("⚠️ Starting Pitcher belum diumumkan (TBD). Silakan pilih pertandingan lain.")
     st.stop()
 
-# Set Handedness Otomatis (Aturan #6)
+# Handedness Setup
 if "Away:" in selected_pitcher_label:
     default_rhb_pct = selected_game.get('home_lineup_rhb_pct', 0.65) * 100
 else:
@@ -71,89 +62,98 @@ else:
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("Opponent Lineup (Handedness)")
-pct_rhb = st.sidebar.slider("% Batter Kanan (RHB) di Lineup Lawan", 0.0, 100.0, float(default_rhb_pct), 5.0) / 100
+pct_rhb = st.sidebar.slider("% Batter Kanan (RHB) di Lineup Lawan", 0.0, 100.0, float(default_rhb_pct), 5.0) / 100.0
 pct_lhb = 1.0 - pct_rhb
 st.sidebar.write(f"*(Estimasi: {pct_rhb*100:.0f}% RHB, {pct_lhb*100:.0f}% LHB)*")
 
-# Batters Faced (PA) Input
-expected_pa = st.sidebar.number_input("Expected Batters Faced (PA)", min_value=10.0, max_value=35.0, value=22.5, step=0.5)
+# PENYESUAIAN JULI-AGUSTUS: Default PA diturunkan ke 19.5 (Dog Days / Innings Limit)
+expected_pa = st.sidebar.number_input(
+    "Expected Batters Faced (PA)", 
+    min_value=10.0, 
+    max_value=35.0, 
+    value=20.0, 
+    step=0.5,
+    help="Diturunkan ke 20 PA untuk mengantisipasi kelelahan Juli-Agustus & penarikan pitcher lebih awal."
+)
 
-## ==========================================
+# ==========================================
 # 3. STAT LOOKUP & LOGIC (BACKEND)
 # ==========================================
-# ATURAN #1: Matching string aman via data_handler
-stats = get_pitcher_stats(selected_pitcher, df_master, df_rhb, df_lhb)
+stats = dh.get_pitcher_stats(selected_pitcher, df_master, df_rhb, df_lhb)
 
 if not stats:
-    st.error(f"❌ Pitcher '{selected_pitcher}' tidak ditemukan sama sekali di database CSV. Pastikan nama sesuai.")
+    st.error(f"❌ Pitcher '{selected_pitcher}' tidak ditemukan di database. Pastikan nama sesuai.")
     st.stop()
 
-# SISTEM FALLBACK: Jika tidak ada data L60, gunakan data Full Season (Master)
-using_fallback = False
 if not stats['vs_rhb'] and not stats['vs_lhb']:
-    st.warning(f"⚠️ Data L60 tidak ditemukan untuk {selected_pitcher} (Mungkin baru kembali dari cedera). Sistem otomatis menggunakan data Full Season.")
+    st.warning(f"⚠️ Data L60 tidak ditemukan untuk {selected_pitcher}. Menggunakan data Master Full Season.")
     stat_rhb = stats['master']
     stat_lhb = stats['master']
-    using_fallback = True
 else:
-    # Fallback jika hanya ada data salah satu handedness di L60
     stat_rhb = stats['vs_rhb'] if stats['vs_rhb'] else stats['vs_lhb']
     stat_lhb = stats['vs_lhb'] if stats['vs_lhb'] else stats['vs_rhb']
 
-# ATURAN #2: Pembobotan Stat berdasarkan Lineup Lawan
-# (Kita bungkus dengan float() untuk mencegah error jika format angka dari CSV berupa teks)
+# Pembobotan Stat berdasarkan Lineup Lawan (Hyper-Recent L60)
 weighted_k_pct = (float(stat_rhb['k_percent']) * pct_rhb) + (float(stat_lhb['k_percent']) * pct_lhb)
 weighted_bb_pct = (float(stat_rhb['bb_percent']) * pct_rhb) + (float(stat_lhb['bb_percent']) * pct_lhb)
 weighted_xba = (float(stat_rhb['xba']) * pct_rhb) + (float(stat_lhb['xba']) * pct_lhb)
+weighted_xwoba = (float(stat_rhb['xwoba']) * pct_rhb) + (float(stat_lhb['xwoba']) * pct_lhb)
 
-# Hitung nilai ekspektasi
+# Hitung nilai ekspektasi untuk semua pasar prop
 x_strikeouts = me.calculate_xk(expected_pa, weighted_k_pct)
-# ATURAN #3: Fatigue Penalty sudah otomatis terhitung di calculate_xouts
 x_outs = me.calculate_xouts(expected_pa, weighted_bb_pct, weighted_xba)
+x_hits = me.calculate_xhits(expected_pa, weighted_bb_pct, weighted_xba)
+x_walks = me.calculate_xbb(expected_pa, weighted_bb_pct)
+x_er = me.calculate_xer(x_outs, weighted_xwoba)
 
 # ==========================================
 # 4. DASHBOARD & KALKULATOR +EV (UI MAIN)
 # ==========================================
-st.subheader(f"📊 Proyeksi Model untuk {selected_pitcher.title()}")
+st.subheader(f"📊 Proyeksi Model Lengkap untuk {selected_pitcher.title()}")
 
-col_m1, col_m2 = st.columns(2)
-with col_m1:
-    st.metric(
-        label="Expected Strikeouts (xK)",
-        value=f"{x_strikeouts:.2f}",
-        delta=f"Weighted K%: {weighted_k_pct:.1f}%"
-    )
-with col_m2:
-    st.metric(
-        label="Expected Outs (xOuts)",
-        value=f"{x_outs:.2f}",
-        delta="Includes 7.5% Fatigue Penalty",
-        delta_color="off"
-    )
+# Metrik Cards
+m_col1, m_col2, m_col3, m_col4, m_col5 = st.columns(5)
+m_col1.metric("Expected K's", f"{x_strikeouts:.2f}", f"K%: {weighted_k_pct:.1f}%")
+m_col2.metric("Expected Outs", f"{x_outs:.1f}", "-7.5% Fatigue")
+m_col3.metric("Expected Hits", f"{x_hits:.2f}", f"xBA: {weighted_xba:.3f}")
+m_col4.metric("Expected Walks", f"{x_walks:.2f}", f"BB%: {weighted_bb_pct:.1f}%")
+m_col5.metric("Expected ER", f"{x_er:.2f}", f"xwOBA: {weighted_xwoba:.3f}")
 
 st.markdown("---")
 st.subheader("💰 Sportsbook Odds & +EV Analysis")
 
-prop_type = st.radio("Pilih Prop Market:", ["Strikeouts", "Pitching Outs"], horizontal=True)
+# Pilihan 5 Pasar Prop Utama
+prop_type = st.radio(
+    "Pilih Prop Market:", 
+    ["Strikeouts", "Pitching Outs", "Hits Allowed", "Walks Allowed", "Earned Runs"], 
+    horizontal=True
+)
+
+# Mapping proyeksi & default line
+prop_map = {
+    "Strikeouts": (x_strikeouts, 4.5),
+    "Pitching Outs": (x_outs, 15.5),
+    "Hits Allowed": (x_hits, 4.5),
+    "Walks Allowed": (x_walks, 1.5),
+    "Earned Runs": (x_er, 2.5)
+}
+
+current_xval, default_line = prop_map[prop_type]
 
 col_in1, col_in2, col_in3 = st.columns(3)
 with col_in1:
-    line_input = st.number_input("O/U Line Bandar", value=5.5 if prop_type=="Strikeouts" else 15.5, step=0.5)
+    line_input = st.number_input("O/U Line Bandar", value=default_line, step=0.5)
 with col_in2:
     bet_side = st.selectbox("Posisi Bet:", ["Over", "Under"])
 with col_in3:
     odds_input = st.number_input("American Odds (-110, +120, dll)", value=-110, step=5)
 
-# ATURAN #4: Poisson Math
-if prop_type == "Strikeouts":
-    model_prob = me.get_poisson_probability(x_strikeouts, line_input, bet_side)
-else:
-    model_prob = me.get_poisson_probability(x_outs, line_input, bet_side)
-
+# Poisson Math
+model_prob = me.get_poisson_probability(current_xval, line_input, bet_side)
 implied_prob = me.get_implied_probability(odds_input)
 edge = model_prob - implied_prob
 
-# ATURAN #5: Output Margin +EV / -EV
+# Output Hasil +EV / -EV
 st.markdown("### Hasil Analisis EV")
 res_c1, res_c2, res_c3 = st.columns(3)
 res_c1.metric("Implied Prob (Bandar)", f"{implied_prob:.1f}%")
