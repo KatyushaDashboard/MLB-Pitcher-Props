@@ -1,0 +1,34 @@
+name: Manual Bot Updater
+
+# Ini yang bikin workflow-nya bisa dipencet manual lewat tombol
+on:
+  workflow_dispatch:
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        
+    - name: Install Dependencies
+      run: pip install -r requirements.txt
+      
+    - name: Run Bot Updater
+      run: python bot_updater.py
+      
+    - name: Commit and Push Changes
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add data/today_schedule.json
+        git commit -m "🤖 Auto-update: MLB Schedule & Lineup JSON" || echo "Tidak ada perubahan data"
+        git push
