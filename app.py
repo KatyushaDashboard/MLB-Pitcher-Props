@@ -106,12 +106,11 @@ x_hits = me.calculate_xhits(expected_pa, weighted_bb_pct, weighted_xba)
 x_walks = me.calculate_xbb(expected_pa, weighted_bb_pct)
 x_er = me.calculate_xer(x_outs, weighted_xwoba)
 
-# ==========================================
+## ==========================================
 # 4. DASHBOARD & KALKULATOR +EV (UI MAIN)
 # ==========================================
 st.subheader(f"📊 Proyeksi Model Lengkap untuk {selected_pitcher.title()}")
 
-# Metrik Cards
 m_col1, m_col2, m_col3, m_col4, m_col5 = st.columns(5)
 m_col1.metric("Expected K's", f"{x_strikeouts:.2f}", f"K%: {weighted_k_pct:.1f}%")
 m_col2.metric("Expected Outs", f"{x_outs:.1f}", "-7.5% Fatigue")
@@ -129,7 +128,16 @@ prop_type = st.radio(
     horizontal=True
 )
 
-# Mapping proyeksi & default line
+# API Market Key Mapping
+market_keys_map = {
+    "Strikeouts": "pitcher_strikeouts",
+    "Pitching Outs": "pitcher_outs",
+    "Hits Allowed": "pitcher_hits_allowed",
+    "Walks Allowed": "pitcher_walks",
+    "Earned Runs": "pitcher_earned_runs"
+}
+
+# Mapping proyeksi & Fallback Default Line jika bandar belum merilis line
 prop_map = {
     "Strikeouts": (x_strikeouts, 4.5),
     "Pitching Outs": (x_outs, 15.5),
@@ -138,15 +146,35 @@ prop_map = {
     "Earned Runs": (x_er, 2.5)
 }
 
-current_xval, default_line = prop_map[prop_type]
+current_xval, fallback_line = prop_map[prop_type]
 
+# Tarik data API Odds dari JSON
+if "Away:" in selected_pitcher_label:
+    pitcher_props_api = selected_game.get('away_pitcher_props', {})
+else:
+    pitcher_props_api = selected_game.get('home_pitcher_props', {})
+
+api_market_key = market_keys_map[prop_type]
+api_prop_data = pitcher_props_api.get(api_market_key, {})
+
+# Tentukan Line (Pakai Line API jika ada, jika tidak pakai fallback)
+api_line = api_prop_data.get("line")
+default_line_val = float(api_line) if api_line is not None else float(fallback_line)
+
+# UI Input
 col_in1, col_in2, col_in3 = st.columns(3)
 with col_in1:
-    line_input = st.number_input("O/U Line Bandar", value=default_line, step=0.5)
+    line_input = st.number_input("O/U Line Bandar", value=default_line_val, step=0.5, 
+                                 help="Otomatis diambil dari Odds API jika tersedia.")
 with col_in2:
     bet_side = st.selectbox("Posisi Bet:", ["Over", "Under"])
+    
 with col_in3:
-    odds_input = st.number_input("American Odds (-110, +120, dll)", value=-110, step=5)
+    # Set Odds otomatis berdasarkan pilihan bet_side (Over/Under)
+    api_odds = api_prop_data.get(bet_side)
+    default_odds_val = int(api_odds) if api_odds is not None else -110
+    odds_input = st.number_input("American Odds (-110, +120, dll)", value=default_odds_val, step=5,
+                                 help="Otomatis diambil dari Odds API jika tersedia.")
 
 # Poisson Math
 model_prob = me.get_poisson_probability(current_xval, line_input, bet_side)
