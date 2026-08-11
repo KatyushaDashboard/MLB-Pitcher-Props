@@ -3,63 +3,80 @@ import pandas as pd
 def clean_name_string(name):
     """
     ATURAN #1: ANTI-ERROR STRING MATCHING
-    Membersihkan string dari spasi berlebih dan menjadikannya huruf kecil.
+    Membersihkan string dari spasi berlebih, format 'Last, First', dan huruf kecil.
     """
     if pd.isna(name):
         return ""
-    return str(name).strip().lower()
-
-def format_savant_name(savant_name):
-    """
-    Mengubah format "Last, First" (contoh: "Cole, Gerrit") 
-    menjadi "First Last" ("gerrit cole") untuk data splits.
-    """
-    cleaned = clean_name_string(savant_name)
-    if ',' in cleaned:
-        parts = cleaned.split(',')
-        # parts[0] = Last, parts[1] = First
+    name_str = str(name).strip().lower()
+    
+    # Jika formatnya 'last, first' (contoh: 'cole, gerrit'), kita balik jadi 'gerrit cole'
+    if ',' in name_str:
+        parts = name_str.split(',')
         return f"{parts[1].strip()} {parts[0].strip()}"
-    return cleaned
+    return name_str
+
+def extract_clean_names(df):
+    """
+    Mendeteksi kolom nama di DataFrame secara dinamis dan membuat kolom 'clean_name'.
+    """
+    # Samakan semua nama header kolom menjadi lowercase agar tidak ada beda 'Player' vs 'player'
+    df.columns = df.columns.str.strip().str.lower()
+    
+    if 'clean_name' in df.columns:
+        return df
+
+    # Cek berbagai kemungkinan nama header kolom nama dari Savant / Master CSV
+    if 'player_name' in df.columns:
+        df['clean_name'] = df['player_name'].apply(clean_name_string)
+    elif 'player' in df.columns:
+        df['clean_name'] = df['player'].apply(clean_name_string)
+    elif 'name' in df.columns:
+        df['clean_name'] = df['name'].apply(clean_name_string)
+    elif 'first_name' in df.columns and 'last_name' in df.columns:
+        df['clean_name'] = df.apply(
+            lambda row: clean_name_string(f"{row['first_name']} {row['last_name']}"), axis=1
+        )
+    else:
+        # Fallback: cari kolom apa saja yang mengandung kata 'name' atau 'player'
+        possible_cols = [c for c in df.columns if 'name' in c or 'player' in c]
+        if possible_cols:
+            df['clean_name'] = df[possible_cols[0]].apply(clean_name_string)
+        else:
+            raise KeyError(f"Tidak dapat menemukan kolom nama pitcher. Header kolom yang ada: {list(df.columns)}")
+            
+    return df
 
 def load_and_clean_data():
     """
-    Meload CSV dan menstandarisasi nama pitcher ke dalam kolom baru 'clean_name'
-    agar bisa di-lookup dengan 100% akurasi.
+    Meload CSV dan menstandarisasi nama pitcher.
     """
-    # 1. Load Splits Data (L60)
     df_rhb = pd.read_csv('data/pitcher_vs_rhb.csv')
     df_lhb = pd.read_csv('data/pitcher_vs_lhb.csv')
-    
-    # Terapkan pembersih string ke kolom 'player_name'
-    df_rhb['clean_name'] = df_rhb['player_name'].apply(format_savant_name)
-    df_lhb['clean_name'] = df_lhb['player_name'].apply(format_savant_name)
-    
-    # 2. Load Master Data (Full Season)
     df_master = pd.read_csv('data/master_pitcher2026.csv')
     
-    # Gabungkan 'first_name' dan 'last_name' lalu bersihkan
-    df_master['clean_name'] = df_master.apply(
-        lambda row: clean_name_string(f"{row['first_name']} {row['last_name']}"), 
-        axis=1
-    )
+    # Terapkan pembersih fleksibel ke ketiga dataframe
+    df_rhb = extract_clean_names(df_rhb)
+    df_lhb = extract_clean_names(df_lhb)
+    df_master = extract_clean_names(df_master)
     
     return df_master, df_rhb, df_lhb
 
 def get_pitcher_stats(pitcher_name, df_master, df_rhb, df_lhb):
     """
-    Mengambil seluruh data pitcher (Master, vs RHB, vs LHB) hanya dengan modal nama.
+    Mengambil seluruh data pitcher (Master, vs RHB, vs LHB) berdasarkan nama.
     """
     target_name = clean_name_string(pitcher_name)
     
-    # Mencari data dengan metode aman
     master_stat = df_master[df_master['clean_name'] == target_name]
     rhb_stat = df_rhb[df_rhb['clean_name'] == target_name]
     lhb_stat = df_lhb[df_lhb['clean_name'] == target_name]
     
-    # Jika pitcher tidak ditemukan di master, kembalikan None
+    # Fallback jika ada perbedaan ejaan tipis
     if master_stat.empty:
-        return None
-        
+        master_stat = df_master[df_master['clean_name'].str.contains(target_name, regex=False)]
+        if master_stat.empty:
+            return None
+            
     return {
         "name": pitcher_name,
         "master": master_stat.iloc[0].to_dict(),
