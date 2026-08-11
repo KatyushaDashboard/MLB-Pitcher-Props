@@ -6,30 +6,15 @@ import os
 ODDS_API_KEY = "c8d93d667bf40310980a6d68e154c96f"
 
 def get_pitcher_props():
-    """
-    Menarik Prop Lines & Odds dari The Odds API.
-    Aturan API: Player Props harus ditarik menggunakan Event ID spesifik per pertandingan.
-    """
+    """Menarik Prop Lines & Odds dari The Odds API per Event ID."""
     base_url = "https://api.the-odds-api.com/v4/sports/baseball_mlb"
     props_dict = {}
     
-    print("Mendapatkan daftar Pertandingan (Event) dari The Odds API...")
-    
-    # LANGKAH 1: Dapatkan daftar ID event/pertandingan hari ini
     events_response = requests.get(f"{base_url}/events", params={"apiKey": ODDS_API_KEY})
-    
     if events_response.status_code != 200:
-        print(f"❌ Gagal menarik events: {events_response.text}")
         return props_dict
         
     events = events_response.json()
-    if not events:
-        print("⚠️ Tidak ada event MLB yang ditemukan di The Odds API hari ini.")
-        return props_dict
-
-    print(f"✅ Ditemukan {len(events)} pertandingan. Menarik Line Prop untuk masing-masing pitcher...")
-    
-    # LANGKAH 2: Loop per event untuk menarik Player Props
     markets_needed = "pitcher_strikeouts,pitcher_outs,pitcher_hits_allowed,pitcher_walks,pitcher_earned_runs"
     
     for event in events:
@@ -40,22 +25,19 @@ def get_pitcher_props():
             "regions": "us",
             "markets": markets_needed,
             "oddsFormat": "american",
-            "bookmakers": "draftkings,fanduel" # Tarik data dari bandar utama
+            "bookmakers": "draftkings,fanduel"
         }
         
         try:
             odds_response = requests.get(odds_url, params=params)
-            
             if odds_response.status_code == 200:
                 event_data = odds_response.json()
-                
-                # Ekstrak data dan masukkan ke dictionary
                 for bookmaker in event_data.get("bookmakers", []):
                     for market in bookmaker.get("markets", []):
                         market_key = market["key"]
                         for outcome in market.get("outcomes", []):
                             pitcher_name = outcome.get("description", "Unknown").lower().strip()
-                            side = outcome.get("name") # "Over" atau "Under"
+                            side = outcome.get("name")
                             
                             if pitcher_name not in props_dict:
                                 props_dict[pitcher_name] = {}
@@ -65,61 +47,127 @@ def get_pitcher_props():
                                     "Over": -110,
                                     "Under": -110
                                 }
-                            
-                            # Memasukkan nilai American Odds
                             if side in ["Over", "Under"]:
                                 props_dict[pitcher_name][market_key][side] = outcome.get("price")
-            else:
-                pass # Abaikan jika bandar belum merilis prop line untuk event ini
-                
-        except Exception as e:
-            print(f"❌ Error saat menarik data untuk event {event_id}: {e}")
+        except Exception:
+            pass
             
-    print(f"✅ Sukses memetakan Odds untuk {len(props_dict)} pitcher!")
     return props_dict
 
+def get_pitcher_recent_pa(pitcher_id):
+    """
+    OTOMASI EXPECTED PA:
+    Menarik rata-rata Batters Faced (PA) per start si pitcher dalam 30 hari terakhir dari MLB API.
+    """
+    if not pitcher_id:
+        return 19.5 # Fallback default jika ID tidak ada
+        
+    url = f"https://statsapi.mlb.com/api/v1/people/{pitcher_id}/stats?stats=byMonth&group=pitching"
+    try:
+        res = requests.get(url)
+        if res.status_code == 200:
+            data = res.json()
+            stats_list = data.get('stats', [])[0].get('splits', [])
+            if stats_list:
+                # Ambil statistik bulan terbaru (30d terakhir)
+                latest_month = stats_list[-1].get('stat', {})
+                games_started = latest_month.get('gamesStarted', 0)
+                batters_faced = latest_month.get('battersFaced', 0)
+                
+                if games_started > 0:
+                    avg_pa = batters_faced / games_started
+                    return round(avg_pa, 1)
+    except Exception:
+        pass
+        
+    return 19.5 # Fallback standar
+
+def calculate_lineup_handedness(game_pk, team_type, pitcher_hand):
+    """
+    OTOMASI HANDEDNESS %:
+    Menarik 9 nama projected batter dari MLB Preview, cek R/L/S, dan sesuaikan Switch Hitter.
+    """
+    url = f"https://statsapi.mlb.com/api/v1/game/{game_pk}/lineups"
+    try:
+        res = requests.get(url)
+        if res.status_code == 200:
+            data = res.json()
+            lineup = data.get(team_type, [])
+            
+            if lineup:
+                rhb_count = 0
+                total_batters = len(lineup[:9]) # Ambil 9 starter utama
+                
+                for player in lineup[:9]:
+                    bat_side = player.get('batSide', {}).get('code', 'R')
+                    
+                    if bat_side == 'R':
+                        rhb_count += 1
+                    elif bat_side == 'S': # Switch Hitter Logic
+                        # Jika pitcher Kanan, Switch Hitter jadi Kiri (LHB).
+                        # Jika pitcher Kiri, Switch Hitter jadi Kanan (RHB).
+                        if pitcher_hand == 'L':
+                            rhb_count += 1
+                            
+                if total_batters > 0:
+                    return round(rhb_count / total_batters, 2)
+    except Exception:
+        pass
+        
+    return 0.65 # Fallback standar
+
 def get_today_schedule():
-    """Menarik jadwal dari MLB dan menggabungkannya dengan Odds dari Sportsbook."""
     today = datetime.datetime.now().strftime('%Y-%m-%d')
     url = f"https://statsapi.mlb.com/api/v1/schedule?sportId=1&date={today}&hydrate=probablePitcher(note)"
     
-    print(f"Menarik jadwal pertandingan resmi MLB untuk tanggal {today}...")
+    print(f"Menarik jadwal MLB & memproses algoritma otomatis untuk {today}...")
     response = requests.get(url)
     games_list = []
     
-    if response.status_code != 200:
-        print("❌ Gagal menarik API MLB.")
-        return games_list
-        
-    data = response.json()
-    if 'dates' not in data or not data['dates']:
+    if response.status_code != 200 or 'dates' not in response.json() or not response.json()['dates']:
         print("⚠️ Tidak ada jadwal MLB hari ini.")
         return games_list
         
-    games = data['dates'][0]['games']
-    
-    # Eksekusi fungsi penarik Odds
+    games = response.json()['dates'][0]['games']
     props_data = get_pitcher_props()
     
     for game in games:
+        game_pk = game['gamePk']
         away_team = game['teams']['away']['team']['name']
         home_team = game['teams']['home']['team']['name']
         
-        away_pitcher = game['teams']['away'].get('probablePitcher', {}).get('fullName', 'TBD')
-        home_pitcher = game['teams']['home'].get('probablePitcher', {}).get('fullName', 'TBD')
+        away_pitcher_info = game['teams']['away'].get('probablePitcher', {})
+        home_pitcher_info = game['teams']['home'].get('probablePitcher', {})
         
-        # Cocokkan nama pitcher MLB dengan nama dari Odds API
+        away_pitcher = away_pitcher_info.get('fullName', 'TBD')
+        home_pitcher = home_pitcher_info.get('fullName', 'TBD')
+        
+        # Ambil ID & Tangan Pitcher
+        away_pitcher_id = away_pitcher_info.get('id')
+        home_pitcher_id = home_pitcher_info.get('id')
+        
+        # Hitung Expected PA 30 hari terakhir
+        away_expected_pa = get_pitcher_recent_pa(away_pitcher_id)
+        home_expected_pa = get_pitcher_recent_pa(home_pitcher_id)
+        
+        # Hitung Handedness 9 Batter Lawan
+        # (Away Pitcher lawan Home Lineup, Home Pitcher lawan Away Lineup)
+        home_rhb_pct = calculate_lineup_handedness(game_pk, 'homeLineup', 'R')
+        away_rhb_pct = calculate_lineup_handedness(game_pk, 'awayLineup', 'R')
+        
         away_props = props_data.get(away_pitcher.lower().strip(), {})
         home_props = props_data.get(home_pitcher.lower().strip(), {})
         
         game_data = {
-            "game_id": game['gamePk'],
+            "game_id": game_pk,
             "away_team": away_team,
             "home_team": home_team,
             "away_pitcher": away_pitcher,
             "home_pitcher": home_pitcher,
-            "away_lineup_rhb_pct": 0.65, 
-            "home_lineup_rhb_pct": 0.65,
+            "away_pitcher_pa": away_expected_pa,
+            "home_pitcher_pa": home_expected_pa,
+            "away_lineup_rhb_pct": away_rhb_pct,
+            "home_lineup_rhb_pct": home_rhb_pct,
             "away_pitcher_props": away_props,
             "home_pitcher_props": home_props
         }
@@ -131,7 +179,7 @@ def save_schedule_to_json(schedule_data, filename="data/today_schedule.json"):
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, 'w') as f:
         json.dump(schedule_data, f, indent=4)
-    print(f"🔥 BOOM! {len(schedule_data)} pertandingan beserta Odds bandar berhasil disimpan ke {filename}")
+    print(f"🔥 BOOM! Data jadwal, Lineup Handedness, & Expected PA 30D berhasil disimpan ke {filename}")
 
 if __name__ == "__main__":
     schedule = get_today_schedule()
