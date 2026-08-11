@@ -7,8 +7,60 @@
         "home_pitcher": "Drew Anderson",
         "away_lineup_rhb_pct": 0.65,
         "home_lineup_rhb_pct": 0.65,
-        "away_pitcher_props": {},
-        "home_pitcher_props": {}
+        "away_pitcher_props": {
+            "pitcher_outs": {
+                "line": 17.5,
+                "Over": -145,
+                "Under": 109
+            },
+            "pitcher_strikeouts": {
+                "line": 4.5,
+                "Over": -118,
+                "Under": -108
+            },
+            "pitcher_earned_runs": {
+                "line": 2.5,
+                "Over": -121,
+                "Under": -110
+            },
+            "pitcher_hits_allowed": {
+                "line": 5.5,
+                "Over": -113,
+                "Under": -117
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": -133,
+                "Under": 100
+            }
+        },
+        "home_pitcher_props": {
+            "pitcher_outs": {
+                "line": 12.5,
+                "Over": 149,
+                "Under": -200
+            },
+            "pitcher_strikeouts": {
+                "line": 3.5,
+                "Over": 123,
+                "Under": -157
+            },
+            "pitcher_earned_runs": {
+                "line": 1.5,
+                "Over": 113,
+                "Under": -150
+            },
+            "pitcher_hits_allowed": {
+                "line": 3.5,
+                "Over": 108,
+                "Under": -144
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": 161,
+                "Under": -217
+            }
+        }
     },
     {
         "game_id": 823832,
@@ -18,7 +70,33 @@
         "home_pitcher": "Eury P\u00e9rez",
         "away_lineup_rhb_pct": 0.65,
         "home_lineup_rhb_pct": 0.65,
-        "away_pitcher_props": {},
+        "away_pitcher_props": {
+            "pitcher_outs": {
+                "line": 17.5,
+                "Over": -136,
+                "Under": 102
+            },
+            "pitcher_strikeouts": {
+                "line": 6.5,
+                "Over": -151,
+                "Under": 118
+            },
+            "pitcher_earned_runs": {
+                "line": 1.5,
+                "Over": -131,
+                "Under": -101
+            },
+            "pitcher_hits_allowed": {
+                "line": 4.5,
+                "Over": 113,
+                "Under": -150
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": -160,
+                "Under": 120
+            }
+        },
         "home_pitcher_props": {}
     },
     {
@@ -29,7 +107,33 @@
         "home_pitcher": "TBD",
         "away_lineup_rhb_pct": 0.65,
         "home_lineup_rhb_pct": 0.65,
-        "away_pitcher_props": {},
+        "away_pitcher_props": {
+            "pitcher_outs": {
+                "line": 17.5,
+                "Over": -164,
+                "Under": 123
+            },
+            "pitcher_strikeouts": {
+                "line": 5.5,
+                "Over": 105,
+                "Under": -134
+            },
+            "pitcher_earned_runs": {
+                "line": 2.5,
+                "Over": 106,
+                "Under": -141
+            },
+            "pitcher_hits_allowed": {
+                "line": 5.5,
+                "Over": 106,
+                "Under": -140
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": 135,
+                "Under": -181
+            }
+        },
         "home_pitcher_props": {}
     },
     {
@@ -40,8 +144,60 @@
         "home_pitcher": "Ryan Weathers",
         "away_lineup_rhb_pct": 0.65,
         "home_lineup_rhb_pct": 0.65,
-        "away_pitcher_props": {},
-        "home_pitcher_props": {}
+        "away_pitcher_props": {
+            "pitcher_outs": {
+                "line": 17.5,
+                "Over": -116,
+                "Under": -114
+            },
+            "pitcher_strikeouts": {
+                "line": 6.5,
+                "Over": 125,
+                "Under": -160
+            },
+            "pitcher_earned_runs": {
+                "line": 2.5,
+                "Over": -111,
+                "Under": -120
+            },
+            "pitcher_hits_allowed": {
+                "line": 5.5,
+                "Over": 122,
+                "Under": -162
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": 100,
+                "Under": -133
+            }
+        },
+        "home_pitcher_props": {
+            "pitcher_outs": {
+                "line": 17.5,
+                "Over": -142,
+                "Under": 107
+            },
+            "pitcher_strikeouts": {
+                "line": 6.5,
+                "Over": 124,
+                "Under": -159
+            },
+            "pitcher_earned_runs": {
+                "line": 2.5,
+                "Over": 125,
+                "Under": -167
+            },
+            "pitcher_hits_allowed": {
+                "line": 4.5,
+                "Over": -149,
+                "Under": 112
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": -116,
+                "Under": -114
+            }
+        }
     },
     {
         "game_id": 822778,
@@ -51,8 +207,60 @@
         "home_pitcher": "Dylan Cease",
         "away_lineup_rhb_pct": 0.65,
         "home_lineup_rhb_pct": 0.65,
-        "away_pitcher_props": {},
-        "home_pitcher_props": {}
+        "away_pitcher_props": {
+            "pitcher_outs": {
+                "line": 15.5,
+                "Over": 108,
+                "Under": -143
+            },
+            "pitcher_strikeouts": {
+                "line": 4.5,
+                "Over": 113,
+                "Under": -145
+            },
+            "pitcher_earned_runs": {
+                "line": 1.5,
+                "Over": -172,
+                "Under": 129
+            },
+            "pitcher_hits_allowed": {
+                "line": 4.5,
+                "Over": -147,
+                "Under": 111
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": -173,
+                "Under": 130
+            }
+        },
+        "home_pitcher_props": {
+            "pitcher_outs": {
+                "line": 18.5,
+                "Over": 130,
+                "Under": -173
+            },
+            "pitcher_strikeouts": {
+                "line": 7.5,
+                "Over": -147,
+                "Under": 115
+            },
+            "pitcher_earned_runs": {
+                "line": 1.5,
+                "Over": -136,
+                "Under": 102
+            },
+            "pitcher_hits_allowed": {
+                "line": 4.5,
+                "Over": 121,
+                "Under": -161
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": -172,
+                "Under": 129
+            }
+        }
     },
     {
         "game_id": 824886,
@@ -62,7 +270,33 @@
         "home_pitcher": "Mart\u00edn P\u00e9rez",
         "away_lineup_rhb_pct": 0.65,
         "home_lineup_rhb_pct": 0.65,
-        "away_pitcher_props": {},
+        "away_pitcher_props": {
+            "pitcher_outs": {
+                "line": 17.5,
+                "Over": -142,
+                "Under": 107
+            },
+            "pitcher_strikeouts": {
+                "line": 5.5,
+                "Over": 124,
+                "Under": -159
+            },
+            "pitcher_earned_runs": {
+                "line": 2.5,
+                "Over": -104,
+                "Under": -127
+            },
+            "pitcher_hits_allowed": {
+                "line": 5.5,
+                "Over": 104,
+                "Under": -138
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": -195,
+                "Under": 146
+            }
+        },
         "home_pitcher_props": {}
     },
     {
@@ -73,8 +307,60 @@
         "home_pitcher": "Bailey Ober",
         "away_lineup_rhb_pct": 0.65,
         "home_lineup_rhb_pct": 0.65,
-        "away_pitcher_props": {},
-        "home_pitcher_props": {}
+        "away_pitcher_props": {
+            "pitcher_outs": {
+                "line": 17.5,
+                "Over": -110,
+                "Under": -121
+            },
+            "pitcher_strikeouts": {
+                "line": 4.5,
+                "Over": 119,
+                "Under": -152
+            },
+            "pitcher_earned_runs": {
+                "line": 2.5,
+                "Over": -134,
+                "Under": 101
+            },
+            "pitcher_hits_allowed": {
+                "line": 5.5,
+                "Over": -126,
+                "Under": -105
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": -139,
+                "Under": 104
+            }
+        },
+        "home_pitcher_props": {
+            "pitcher_outs": {
+                "line": 16.5,
+                "Over": -125,
+                "Under": -106
+            },
+            "pitcher_strikeouts": {
+                "line": 4.5,
+                "Over": 102,
+                "Under": -130
+            },
+            "pitcher_earned_runs": {
+                "line": 2.5,
+                "Over": -143,
+                "Under": 108
+            },
+            "pitcher_hits_allowed": {
+                "line": 5.5,
+                "Over": 111,
+                "Under": -148
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": -112,
+                "Under": -119
+            }
+        }
     },
     {
         "game_id": 824563,
@@ -84,8 +370,60 @@
         "home_pitcher": "Sean Burke",
         "away_lineup_rhb_pct": 0.65,
         "home_lineup_rhb_pct": 0.65,
-        "away_pitcher_props": {},
-        "home_pitcher_props": {}
+        "away_pitcher_props": {
+            "pitcher_outs": {
+                "line": 14.5,
+                "Over": -162,
+                "Under": 121
+            },
+            "pitcher_strikeouts": {
+                "line": 4.5,
+                "Over": -118,
+                "Under": -108
+            },
+            "pitcher_earned_runs": {
+                "line": 2.5,
+                "Over": 128,
+                "Under": -171
+            },
+            "pitcher_hits_allowed": {
+                "line": 4.5,
+                "Over": -126,
+                "Under": -106
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": 105,
+                "Under": -140
+            }
+        },
+        "home_pitcher_props": {
+            "pitcher_outs": {
+                "line": 17.5,
+                "Over": -111,
+                "Under": -119
+            },
+            "pitcher_strikeouts": {
+                "line": 7.5,
+                "Over": 110,
+                "Under": -141
+            },
+            "pitcher_earned_runs": {
+                "line": 1.5,
+                "Over": -179,
+                "Under": 134
+            },
+            "pitcher_hits_allowed": {
+                "line": 4.5,
+                "Over": 107,
+                "Under": -143
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": -111,
+                "Under": -119
+            }
+        }
     },
     {
         "game_id": 823019,
@@ -96,7 +434,33 @@
         "away_lineup_rhb_pct": 0.65,
         "home_lineup_rhb_pct": 0.65,
         "away_pitcher_props": {},
-        "home_pitcher_props": {}
+        "home_pitcher_props": {
+            "pitcher_outs": {
+                "line": 16.5,
+                "Over": -112,
+                "Under": -119
+            },
+            "pitcher_strikeouts": {
+                "line": 3.5,
+                "Over": -110,
+                "Under": -116
+            },
+            "pitcher_earned_runs": {
+                "line": 2.5,
+                "Over": 100,
+                "Under": -133
+            },
+            "pitcher_hits_allowed": {
+                "line": 5.5,
+                "Over": -106,
+                "Under": -126
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": -138,
+                "Under": 104
+            }
+        }
     },
     {
         "game_id": 823997,
@@ -106,8 +470,60 @@
         "home_pitcher": "Ryan Johnson",
         "away_lineup_rhb_pct": 0.65,
         "home_lineup_rhb_pct": 0.65,
-        "away_pitcher_props": {},
-        "home_pitcher_props": {}
+        "away_pitcher_props": {
+            "pitcher_outs": {
+                "line": 15.5,
+                "Over": -112,
+                "Under": -119
+            },
+            "pitcher_strikeouts": {
+                "line": 4.5,
+                "Over": -153,
+                "Under": 120
+            },
+            "pitcher_earned_runs": {
+                "line": 2.5,
+                "Over": 124,
+                "Under": -166
+            },
+            "pitcher_hits_allowed": {
+                "line": 4.5,
+                "Over": -132,
+                "Under": 100
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": 123,
+                "Under": -164
+            }
+        },
+        "home_pitcher_props": {
+            "pitcher_outs": {
+                "line": 15.5,
+                "Over": 134,
+                "Under": -180
+            },
+            "pitcher_strikeouts": {
+                "line": 4.5,
+                "Over": 131,
+                "Under": -168
+            },
+            "pitcher_earned_runs": {
+                "line": 2.5,
+                "Over": -118,
+                "Under": -112
+            },
+            "pitcher_hits_allowed": {
+                "line": 4.5,
+                "Over": -160,
+                "Under": 120
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": -147,
+                "Under": 110
+            }
+        }
     },
     {
         "game_id": 825046,
@@ -117,8 +533,60 @@
         "home_pitcher": "Mitch Bratt",
         "away_lineup_rhb_pct": 0.65,
         "home_lineup_rhb_pct": 0.65,
-        "away_pitcher_props": {},
-        "home_pitcher_props": {}
+        "away_pitcher_props": {
+            "pitcher_outs": {
+                "line": 15.5,
+                "Over": 109,
+                "Under": -145
+            },
+            "pitcher_strikeouts": {
+                "line": 2.5,
+                "Over": -138,
+                "Under": 108
+            },
+            "pitcher_earned_runs": {
+                "line": 3.5,
+                "Over": 120,
+                "Under": -159
+            },
+            "pitcher_hits_allowed": {
+                "line": 6.5,
+                "Over": 116,
+                "Under": -154
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": -128,
+                "Under": -104
+            }
+        },
+        "home_pitcher_props": {
+            "pitcher_outs": {
+                "line": 15.5,
+                "Over": -128,
+                "Under": -103
+            },
+            "pitcher_strikeouts": {
+                "line": 4.5,
+                "Over": 116,
+                "Under": -148
+            },
+            "pitcher_earned_runs": {
+                "line": 2.5,
+                "Over": 112,
+                "Under": -149
+            },
+            "pitcher_hits_allowed": {
+                "line": 4.5,
+                "Over": -157,
+                "Under": 118
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": -111,
+                "Under": -120
+            }
+        }
     },
     {
         "game_id": 824970,
@@ -128,8 +596,60 @@
         "home_pitcher": "Mason Barnett",
         "away_lineup_rhb_pct": 0.65,
         "home_lineup_rhb_pct": 0.65,
-        "away_pitcher_props": {},
-        "home_pitcher_props": {}
+        "away_pitcher_props": {
+            "pitcher_strikeouts": {
+                "line": 3.5,
+                "Over": 121,
+                "Under": -155
+            },
+            "pitcher_earned_runs": {
+                "line": 2.5,
+                "Over": -142,
+                "Under": 107
+            },
+            "pitcher_hits_allowed": {
+                "line": 6.5,
+                "Over": 120,
+                "Under": -159
+            },
+            "pitcher_outs": {
+                "line": 17.5,
+                "Over": 105,
+                "Under": -140
+            },
+            "pitcher_walks": {
+                "line": 0.5,
+                "Over": -209,
+                "Under": 155
+            }
+        },
+        "home_pitcher_props": {
+            "pitcher_strikeouts": {
+                "line": 3.5,
+                "Over": 101,
+                "Under": -129
+            },
+            "pitcher_earned_runs": {
+                "line": 2.5,
+                "Over": -143,
+                "Under": 108
+            },
+            "pitcher_hits_allowed": {
+                "line": 5.5,
+                "Over": -105,
+                "Under": -127
+            },
+            "pitcher_outs": {
+                "line": 14.5,
+                "Over": -113,
+                "Under": -117
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": -180,
+                "Under": 135
+            }
+        }
     },
     {
         "game_id": 823264,
@@ -139,8 +659,60 @@
         "home_pitcher": "Walker Buehler",
         "away_lineup_rhb_pct": 0.65,
         "home_lineup_rhb_pct": 0.65,
-        "away_pitcher_props": {},
-        "home_pitcher_props": {}
+        "away_pitcher_props": {
+            "pitcher_outs": {
+                "line": 15.5,
+                "Over": 124,
+                "Under": -165
+            },
+            "pitcher_strikeouts": {
+                "line": 5.5,
+                "Over": 116,
+                "Under": -148
+            },
+            "pitcher_earned_runs": {
+                "line": 1.5,
+                "Over": -141,
+                "Under": 106
+            },
+            "pitcher_hits_allowed": {
+                "line": 4.5,
+                "Over": 114,
+                "Under": -152
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": 118,
+                "Under": -157
+            }
+        },
+        "home_pitcher_props": {
+            "pitcher_outs": {
+                "line": 14.5,
+                "Over": -114,
+                "Under": -116
+            },
+            "pitcher_strikeouts": {
+                "line": 4.5,
+                "Over": 118,
+                "Under": -151
+            },
+            "pitcher_earned_runs": {
+                "line": 2.5,
+                "Over": 129,
+                "Under": -171
+            },
+            "pitcher_hits_allowed": {
+                "line": 4.5,
+                "Over": 101,
+                "Under": -135
+            },
+            "pitcher_walks": {
+                "line": 2.5,
+                "Over": 142,
+                "Under": -189
+            }
+        }
     },
     {
         "game_id": 823186,
@@ -150,8 +722,45 @@
         "home_pitcher": "Carson Whisenhunt",
         "away_lineup_rhb_pct": 0.65,
         "home_lineup_rhb_pct": 0.65,
-        "away_pitcher_props": {},
-        "home_pitcher_props": {}
+        "away_pitcher_props": {
+            "pitcher_strikeouts": {
+                "line": 5.5,
+                "Over": -132,
+                "Under": 103
+            },
+            "pitcher_earned_runs": {
+                "line": 1.5,
+                "Over": -146,
+                "Under": 110
+            },
+            "pitcher_hits_allowed": {
+                "line": 4.5,
+                "Over": -120,
+                "Under": -110
+            },
+            "pitcher_outs": {
+                "line": 17.5,
+                "Over": -149,
+                "Under": 112
+            },
+            "pitcher_walks": {
+                "line": 2.5,
+                "Over": -106,
+                "Under": -125
+            }
+        },
+        "home_pitcher_props": {
+            "pitcher_outs": {
+                "line": 15.5,
+                "Over": 126,
+                "Under": -168
+            },
+            "pitcher_strikeouts": {
+                "line": 3.5,
+                "Over": -142,
+                "Under": 111
+            }
+        }
     },
     {
         "game_id": 823917,
@@ -161,7 +770,59 @@
         "home_pitcher": "Blake Snell",
         "away_lineup_rhb_pct": 0.65,
         "home_lineup_rhb_pct": 0.65,
-        "away_pitcher_props": {},
-        "home_pitcher_props": {}
+        "away_pitcher_props": {
+            "pitcher_outs": {
+                "line": 17.5,
+                "Over": -131,
+                "Under": -102
+            },
+            "pitcher_strikeouts": {
+                "line": 4.5,
+                "Over": 111,
+                "Under": -142
+            },
+            "pitcher_earned_runs": {
+                "line": 3.5,
+                "Over": 107,
+                "Under": -142
+            },
+            "pitcher_hits_allowed": {
+                "line": 5.5,
+                "Over": -141,
+                "Under": 106
+            },
+            "pitcher_walks": {
+                "line": 2.5,
+                "Over": 151,
+                "Under": -202
+            }
+        },
+        "home_pitcher_props": {
+            "pitcher_strikeouts": {
+                "line": 6.5,
+                "Over": 126,
+                "Under": -161
+            },
+            "pitcher_earned_runs": {
+                "line": 1.5,
+                "Over": 104,
+                "Under": -138
+            },
+            "pitcher_hits_allowed": {
+                "line": 3.5,
+                "Over": 100,
+                "Under": -133
+            },
+            "pitcher_outs": {
+                "line": 14.5,
+                "Over": -198,
+                "Under": 147
+            },
+            "pitcher_walks": {
+                "line": 1.5,
+                "Over": -130,
+                "Under": -102
+            }
+        }
     }
 ]
