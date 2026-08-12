@@ -168,7 +168,7 @@ if sgp_legs:
                 <p style="margin:5px 0; color:#81c784;"><b>Edge (+EV):</b> +{leg['edge']:.1f}%</p>
                 <small style="color:#aaa;">Expected: {leg['exp_val']:.2f}</small>
             </div>
-            """, unsafe_allowed_html=True)
+            """, unsafe_allow_html=True)
             
     st.info("💡 **SGP Tip:** Anda bisa racik 2 hingga 3 leg di atas menjadi 1 Same Game Parlay di sportsbook Anda!")
 else:
